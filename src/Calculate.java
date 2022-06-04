@@ -21,7 +21,7 @@ public class Calculate {
 	/**
 	 * 当前时间
 	 */
-	private int nowTime;
+	public int nowTime;
 	/**
 	 * 输入的事务列表
 	 */
@@ -63,8 +63,10 @@ public class Calculate {
 	 */
 	public Vector<Job> work() {
 		++nowTime;
-		for (Job i : map.get(nowTime)) {
-			addJob(i);
+		if (map.get(nowTime) != null) {
+			for (Job i : map.get(nowTime)) {
+				addJob(i);
+			}
 		}
 		v.clear();
 		for (int i = 0; i < this.cores; ++i) {

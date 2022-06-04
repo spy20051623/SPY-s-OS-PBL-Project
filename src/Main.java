@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -153,50 +152,80 @@ public class Main {
 	}
 
 	/**
+	 * 步进一个时间片
+	 */
+	private static void stepIn() {
+		Vector<Job> v = calculate.work();
+		labelTime.setText("Current Time: " + calculate.nowTime);
+		if (v.isEmpty()) {
+			labelList.setText("Null");
+		} else {
+			StringBuilder str = new StringBuilder();
+			for (Job i : v) {
+				if (str.length() == 0) {
+					str.append(i.pid);
+				} else {
+					str.append(" ").append(i.pid);
+				}
+				map.put(i.pid, map.get(i.pid) - 1);
+				if (map.get(i.pid) == 0) map.remove(i.pid);
+			}
+			labelList.setText(String.valueOf(str));
+			textQueue.setText("");
+			for (Map.Entry<Integer, Integer> i : map.entrySet()) {
+				textQueue.append(i.getKey() + " " + i.getValue() + "\n");
+			}
+		}
+	}
+
+	/**
 	 * 设置按钮执行操作
 	 */
 	private static void setListeners() {
 		map = new TreeMap<>();
-		buttonStart.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (char i : textCores.getText().toCharArray()) {
-					if (i < '0' || i > '9') {
-						JOptionPane.showMessageDialog(null, "CPU内核数量格式错误", "警告", JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-				}
-				int cores = Integer.parseInt(textCores.getText());
-				if (cores <= 0 || cores > 8) {
-					JOptionPane.showMessageDialog(null, "CPU内核数量不符合要求（1-8）", "警告", JOptionPane.WARNING_MESSAGE);
+		buttonStart.addActionListener(e -> {
+			for (char i : textCores.getText().toCharArray()) {
+				if (i < '0' || i > '9') {
+					JOptionPane.showMessageDialog(null, "CPU内核数量格式错误", "警告", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				Vector<Job> v = new Vector<>();
-				String[] jobs = textJob.getText().split("\n");
-				for (String i : jobs) {
-					String[] num = i.split(" ");
-					if (num.length != 4) {
-						JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
-						return;
-					}
-					for (String j : num) {
-						for (char k : j.toCharArray()) {
-							if (k < '0' || k > '9') {
-								JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
-								return;
-							}
+			}
+			int cores = Integer.parseInt(textCores.getText());
+			if (cores <= 0 || cores > 8) {
+				JOptionPane.showMessageDialog(null, "CPU内核数量不符合要求（1-8）", "警告", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			Vector<Job> v = new Vector<>();
+			String[] jobs = textJob.getText().split("\n");
+			for (String i : jobs) {
+				String[] num = i.split(" ");
+				if (num.length != 4) {
+					JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				for (String j : num) {
+					for (char k : j.toCharArray()) {
+						if (k < '0' || k > '9') {
+							JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
+							return;
 						}
 					}
-					v.add(new Job(Integer.parseInt(num[0]), Integer.parseInt(num[1]), Integer.parseInt(num[2]), Integer.parseInt(num[3])));
 				}
-				map.clear();
-				Map<Integer, Vector<Job>> tmp = new TreeMap<>();
-				for (Job i : v) {
-					map.put(i.pid, i.costTime);
-					tmp.computeIfAbsent(i.startTime, k -> new Vector<>());
-					tmp.get(i.startTime).add(i);
-				}
-				calculate = new Calculate(cores, tmp);
+				v.add(new Job(Integer.parseInt(num[0]), Integer.parseInt(num[1]), Integer.parseInt(num[2]), Integer.parseInt(num[3])));
+			}
+			map.clear();
+			Map<Integer, Vector<Job>> tmp = new TreeMap<>();
+			for (Job i : v) {
+				map.put(i.pid, i.costTime);
+				tmp.computeIfAbsent(i.startTime, k -> new Vector<>());
+				tmp.get(i.startTime).add(i);
+			}
+			calculate = new Calculate(cores, tmp);
+		});
+		buttonNext.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				stepIn();
 			}
 		});
 	}
