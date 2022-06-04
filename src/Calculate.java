@@ -36,11 +36,11 @@ public class Calculate {
 	public Calculate(int cores, Map<Integer, Vector<Job>> map) {
 		this.cores = cores;
 		q = new PriorityQueue<>((o1, o2) -> {
-			if (o1.startTime < o2.startTime) return 1;
-			if (o1.startTime > o2.startTime) return -1;
-			if (o1.priority < o2.priority) return 1;
-			if (o1.priority > o2.priority) return -1;
-			return Integer.compare(o2.costTime, o1.costTime);
+			if (o1.startTime > o2.startTime) return 1;
+			if (o1.startTime < o2.startTime) return -1;
+			if (o1.priority > o2.priority) return 1;
+			if (o1.priority < o2.priority) return -1;
+			return Integer.compare(o1.costTime, o2.costTime);
 		});
 		v = new Vector<>();
 		nowTime = 0;
@@ -116,5 +116,15 @@ class Job {
 		this.startTime = startTime;
 		this.costTime = costTime;
 		this.priority = priority;
+	}
+
+	@Override
+	public String toString() {
+		return "Job{" +
+				"pid=" + pid +
+				", startTime=" + startTime +
+				", costTime=" + costTime +
+				", priority=" + priority +
+				'}';
 	}
 }

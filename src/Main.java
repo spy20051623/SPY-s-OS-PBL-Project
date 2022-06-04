@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -74,7 +72,15 @@ public class Main {
 	/**
 	 * 等待队列
 	 */
-	public static Map<Integer, Integer> map;
+	public static Map<Integer, Integer> mapQueue;
+	/**
+	 * 事务发生时间
+	 */
+	public static Map<Integer, Integer> mapTime;
+	/**
+	 * 计时器
+	 */
+	public static Timer timer;
 
 	/**
 	 * 图形界面窗口建立
@@ -167,13 +173,13 @@ public class Main {
 				} else {
 					str.append(" ").append(i.pid);
 				}
-				map.put(i.pid, map.get(i.pid) - 1);
-				if (map.get(i.pid) == 0) map.remove(i.pid);
+				mapQueue.put(i.pid, mapQueue.get(i.pid) - 1);
+				if (mapQueue.get(i.pid) == 0) mapQueue.remove(i.pid);
 			}
 			labelList.setText(String.valueOf(str));
 			textQueue.setText("");
-			for (Map.Entry<Integer, Integer> i : map.entrySet()) {
-				textQueue.append(i.getKey() + " " + i.getValue() + "\n");
+			for (Map.Entry<Integer, Integer> i : mapQueue.entrySet()) {
+				textQueue.append(i.getKey() + " " + i.getValue() + (calculate.nowTime >= mapTime.get(i.getKey()) ? " (In Queue)\n" : " (Schedule)\n"));
 			}
 		}
 	}
@@ -182,7 +188,9 @@ public class Main {
 	 * 设置按钮执行操作
 	 */
 	private static void setListeners() {
-		map = new TreeMap<>();
+		mapQueue = new TreeMap<>();
+		mapTime = new TreeMap<>();
+		timer = new Timer(1000, e -> stepIn());
 		buttonStart.addActionListener(e -> {
 			for (char i : textCores.getText().toCharArray()) {
 				if (i < '0' || i > '9') {
@@ -213,21 +221,19 @@ public class Main {
 				}
 				v.add(new Job(Integer.parseInt(num[0]), Integer.parseInt(num[1]), Integer.parseInt(num[2]), Integer.parseInt(num[3])));
 			}
-			map.clear();
+			mapQueue.clear();
 			Map<Integer, Vector<Job>> tmp = new TreeMap<>();
 			for (Job i : v) {
-				map.put(i.pid, i.costTime);
+				mapQueue.put(i.pid, i.costTime);
+				mapTime.put(i.pid, i.startTime);
 				tmp.computeIfAbsent(i.startTime, k -> new Vector<>());
 				tmp.get(i.startTime).add(i);
 			}
 			calculate = new Calculate(cores, tmp);
 		});
-		buttonNext.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				stepIn();
-			}
-		});
+		buttonNext.addActionListener(e -> stepIn());
+		buttonPlay.addActionListener(e -> timer.start());
+		buttonStop.addActionListener(e -> timer.stop());
 	}
 
 	/**
