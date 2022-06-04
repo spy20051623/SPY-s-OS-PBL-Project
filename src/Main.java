@@ -1,11 +1,29 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
 
 public class Main {
 	/**
 	 * 主界面窗体
 	 */
 	public static JFrame frame;
+	/**
+	 * 主界面面板
+	 */
+	public static JPanel panel;
+	/**
+	 * 滚动区域（作业）
+	 */
+	public static JScrollPane paneJob;
+	/**
+	 * 滚动区域（等待队列）
+	 */
+	public static JScrollPane paneQueue;
 	/**
 	 * 开始按钮
 	 */
@@ -22,6 +40,10 @@ public class Main {
 	 * 停止播放按钮
 	 */
 	public static JButton buttonStop;
+	/**
+	 * CPU核数量输入框
+	 */
+	public static JTextField textCores;
 	/**
 	 * 事务输入框
 	 */
@@ -50,6 +72,10 @@ public class Main {
 	 * 调度功能类对象
 	 */
 	public static Calculate calculate;
+	/**
+	 * 等待队列
+	 */
+	public static Map<Integer, Integer> map;
 
 	/**
 	 * 图形界面窗口建立
@@ -59,7 +85,9 @@ public class Main {
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
 		frame.setLocationRelativeTo(null);
-		frame.setLayout(null);
+		panel = new JPanel();
+		panel.setLayout(null);
+		frame.add(panel);
 	}
 
 	/**
@@ -68,35 +96,38 @@ public class Main {
 	private static void buildButtons() {
 		buttonStart = new JButton("Start");
 		buttonStart.setBounds(210, 450, 80, 40);
-		buttonStart.setVisible(true);
-		frame.add(buttonStart);
+		panel.add(buttonStart);
 		buttonNext = new JButton("Next");
 		buttonNext.setBounds(310, 450, 80, 40);
-		buttonNext.setVisible(true);
-		frame.add(buttonNext);
+		panel.add(buttonNext);
 		buttonPlay = new JButton("Play");
 		buttonPlay.setBounds(410, 450, 80, 40);
-		buttonPlay.setVisible(true);
-		frame.add(buttonPlay);
+		panel.add(buttonPlay);
 		buttonStop = new JButton("Stop");
 		buttonStop.setBounds(510, 450, 80, 40);
-		buttonStop.setVisible(true);
-		frame.add(buttonStop);
+		panel.add(buttonStop);
 	}
 
 	/**
 	 * 图形界面文本框布置
 	 */
 	private static void buildText() {
+		textCores = new JTextField();
+		textCores.setBounds(50, 50, 250, 30);
+		panel.add(textCores);
+		paneJob = new JScrollPane();
+		paneJob.setBounds(50, 100, 250, 300);
+		panel.add(paneJob);
 		textJob = new JTextArea();
-		textJob.setBounds(50, 50, 250, 350);
-		textJob.setVisible(true);
-		frame.add(textJob);
+		paneJob.setViewportView(textJob);
+		paneJob.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		paneQueue = new JScrollPane();
+		paneQueue.setBounds(350, 150, 380, 250);
+		panel.add(paneQueue);
 		textQueue = new JTextArea();
-		textQueue.setBounds(350, 150, 380, 250);
 		textQueue.setEditable(false);
-		textQueue.setVisible(true);
-		frame.add(textQueue);
+		paneQueue.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		paneQueue.setViewportView(textQueue);
 	}
 
 	/**
@@ -106,35 +137,81 @@ public class Main {
 		labelTime = new JLabel("Current Time: 0");
 		labelTime.setFont(new Font("Consolas", Font.PLAIN, 20));
 		labelTime.setBounds(350, 50, 400, 20);
-		labelTime.setVisible(true);
-		frame.add(labelTime);
+		panel.add(labelTime);
 		labelCurrent = new JLabel("Current Running:");
 		labelCurrent.setFont(new Font("Consolas", Font.PLAIN, 20));
 		labelCurrent.setBounds(350, 75, 400, 20);
-		labelCurrent.setVisible(true);
-		frame.add(labelCurrent);
+		panel.add(labelCurrent);
 		labelList = new JLabel("Null");
 		labelList.setFont(new Font("Consolas", Font.PLAIN, 20));
 		labelList.setBounds(350, 100, 400, 20);
-		labelList.setVisible(true);
-		frame.add(labelList);
+		panel.add(labelList);
 		labelQueue = new JLabel("Queue:");
 		labelQueue.setFont(new Font("Consolas", Font.PLAIN, 20));
 		labelQueue.setBounds(350, 125, 400, 20);
-		labelQueue.setVisible(true);
-		frame.add(labelQueue);
+		panel.add(labelQueue);
+	}
+
+	/**
+	 * 设置按钮执行操作
+	 */
+	private static void setListeners() {
+		map = new TreeMap<>();
+		buttonStart.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for (char i : textCores.getText().toCharArray()) {
+					if (i < '0' || i > '9') {
+						JOptionPane.showMessageDialog(null, "CPU内核数量格式错误", "警告", JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+				}
+				int cores = Integer.parseInt(textCores.getText());
+				if (cores <= 0 || cores > 8) {
+					JOptionPane.showMessageDialog(null, "CPU内核数量不符合要求（1-8）", "警告", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				Vector<Job> v = new Vector<>();
+				String[] jobs = textJob.getText().split("\n");
+				for (String i : jobs) {
+					String[] num = i.split(" ");
+					if (num.length != 4) {
+						JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					for (String j : num) {
+						for (char k : j.toCharArray()) {
+							if (k < '0' || k > '9') {
+								JOptionPane.showMessageDialog(null, "事务输入格式错误", "警告", JOptionPane.WARNING_MESSAGE);
+								return;
+							}
+						}
+					}
+					v.add(new Job(Integer.parseInt(num[0]), Integer.parseInt(num[1]), Integer.parseInt(num[2]), Integer.parseInt(num[3])));
+				}
+				map.clear();
+				Map<Integer, Vector<Job>> tmp = new TreeMap<>();
+				for (Job i : v) {
+					map.put(i.pid, i.costTime);
+					tmp.computeIfAbsent(i.startTime, k -> new Vector<>());
+					tmp.get(i.startTime).add(i);
+				}
+				calculate = new Calculate(cores, tmp);
+			}
+		});
 	}
 
 	/**
 	 * 主函数，主要为引导
 	 *
-	 * @param args 传入参数，一般为空
+	 * @param args 传入参数，留空
 	 */
 	public static void main(String[] args) {
 		buildFrame();
 		buildButtons();
 		buildText();
 		buildLabel();
+		setListeners();
 		frame.setVisible(true);
 	}
 }

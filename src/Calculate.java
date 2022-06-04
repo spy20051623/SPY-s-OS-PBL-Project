@@ -1,4 +1,4 @@
-import java.util.Comparator;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
@@ -22,26 +22,29 @@ public class Calculate {
 	 * 当前时间
 	 */
 	private int nowTime;
+	/**
+	 * 输入的事务列表
+	 */
+	private final Map<Integer, Vector<Job>> map;
 
 	/**
 	 * 实例化一个Calculate对象
 	 *
 	 * @param cores CPU核的数量
+	 * @param map   事务列表
 	 */
-	public Calculate(int cores) {
+	public Calculate(int cores, Map<Integer, Vector<Job>> map) {
 		this.cores = cores;
-		q = new PriorityQueue<>(new Comparator<Job>() {
-			@Override
-			public int compare(Job o1, Job o2) {
-				if (o1.startTime < o2.startTime) return 1;
-				if (o1.startTime > o2.startTime) return -1;
-				if (o1.priority < o2.priority) return 1;
-				if (o1.priority > o2.priority) return -1;
-				return Integer.compare(o2.costTime, o1.costTime);
-			}
+		q = new PriorityQueue<>((o1, o2) -> {
+			if (o1.startTime < o2.startTime) return 1;
+			if (o1.startTime > o2.startTime) return -1;
+			if (o1.priority < o2.priority) return 1;
+			if (o1.priority > o2.priority) return -1;
+			return Integer.compare(o2.costTime, o1.costTime);
 		});
 		v = new Vector<>();
 		nowTime = 0;
+		this.map = map;
 	}
 
 	/**
@@ -59,10 +62,19 @@ public class Calculate {
 	 * @return 当前时间片工作进程列表
 	 */
 	public Vector<Job> work() {
+		++nowTime;
+		for (Job i : map.get(nowTime)) {
+			addJob(i);
+		}
 		v.clear();
 		for (int i = 0; i < this.cores; ++i) {
 			if (q.isEmpty()) break;
 			v.add(q.poll());
+		}
+		for (Job i : v) {
+			if (i.costTime > 1) {
+				q.add(new Job(i.pid, nowTime + i.priority, i.costTime - 1, i.priority));
+			}
 		}
 		return v;
 	}
