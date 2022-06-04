@@ -237,7 +237,7 @@ public class Main {
 	}
 
 	/**
-	 * 主函数，主要为引导
+	 * main方法
 	 *
 	 * @param args 传入参数，留空
 	 */

@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="7b664ca6-64aa-4bd3-be4e-d5db95657b44" name="变更" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Calculate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Calculate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -69,7 +68,7 @@
       <option name="presentableId" value="Default" />
       <updated>1654329898153</updated>
       <workItem from="1654329900109" duration="1408000" />
-      <workItem from="1654332483848" duration="23290000" />
+      <workItem from="1654332483848" duration="25142000" />
     </task>
     <task id="LOCAL-00001" summary="项目创建">
       <created>1654331377897</created>
@@ -99,7 +98,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654359761917</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="功能基本完成">
+      <created>1654362561628</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1654362561628</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -110,6 +116,7 @@
     <MESSAGE value="图形界面基本搭建完成，部分计算组件完成" />
     <MESSAGE value="图形界面搭建完成，计算组件连接初步完成" />
     <MESSAGE value="初步能用，但计算有bug" />
-    <option name="LAST_COMMIT_MESSAGE" value="初步能用，但计算有bug" />
+    <MESSAGE value="功能基本完成" />
+    <option name="LAST_COMMIT_MESSAGE" value="功能基本完成" />
   </component>
 </project>
